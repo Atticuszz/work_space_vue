@@ -1,7 +1,8 @@
+import dashboard from './dashboard'
 import type { VerticalNavItems } from '@/@layouts/types'
 
 export default [
-  {
+  ...dashboard, {
     title: 'Home',
     to: { name: 'index' },
     icon: { icon: 'tabler-smart-home' },
