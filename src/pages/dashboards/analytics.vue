@@ -9,9 +9,9 @@ const vuetifyTheme = useTheme()
   <VRow class="match-height">
     <!-- 👉 Website analytics -->
     <VCol cols="12">
-      <VCard title="Task Done List">
-        <task_done_list/>
-      </VCard>
+
+    <task_done_list/>
+
     </VCol>
   </VRow>
 </template>
