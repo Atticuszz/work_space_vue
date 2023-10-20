@@ -40,14 +40,21 @@ class ItemEditDialog {
     console.log('ItemEditDialog constructor is called')
   }
 
-  editConfirm = (item, taskList) => {
+  editConfirm = (evnent, { item }) => {
     // 在data中找到需要修改的对象和他的索引，并打开编辑对话框
-    this.editedIndex.value = taskList.indexOf(item)
-    this.editedItem = item
+    // console.log("event:",evnent)
+    // console.log("item:",item.value)
+    this.editedIndex.value = dataTable.tableItems.indexOf(item.value)
+
+    // console.log("index=",this.editedIndex.value)
+
+    this.editedItem = toReactive(item.value)
+
+    // console.log("editedItem:",this.editedItem)
     this.editDialog.value = true
   }
 
-  editItem = async taskList => {
+  editItem = async () => {
     workingTasks.value++
     let rawData = deepCopy(this.editedItem)
 
@@ -85,31 +92,14 @@ class ItemEditDialog {
       })
       .finally(() => {
         workingTasks.value-- // 减少正在进行的异步任务的数量
-        // console.log("editItem is called")
-        if (this.editedIndex.value > -1) {
-          // console.log("taskList:", taskList)
-          taskList[this.editedIndex.value] = reactive(toRaw(this.editedItem)) // 正常编辑
-        } else {
-          taskList.push(reactive(toRaw(this.editedItem)))
-        }// 添加新的记录
       })
-
     this.closeEdit()
   }
 
   addNewConfirm = () => {
-    const newItem = reactive(deepCopy(defaultItem))
-
     // 变成2023-11-11这种格式
-
-    newItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
-    this.editedItem = newItem
+    this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
     this.editDialog.value = true
-  }
-
-  deleteConfirm = (item, taskList) => {
-    this.editedIndex.value = taskList.indexOf(item)
-    this.deleteDialog.value = true
   }
 
   deleteItem = async taskList => {
@@ -119,6 +109,7 @@ class ItemEditDialog {
 
     axios.delete(`http://localhost:5000/task_entries/delete_entry/${uuid}`)
       .then(response => {
+
         dataTable.fetchData()
       })
       .catch(error => {
@@ -127,19 +118,14 @@ class ItemEditDialog {
       .finally(() => {
         workingTasks.value-- // 减少正在进行的异步任务的数量
       })
-    this.closeDelete()
-  }
-
-  closeDelete = () => {
-    this.deleteDialog.value = false
-    this.editedIndex.value = -1
-    this.editedItem = reactive(deepCopy(defaultItem))
+    this.closeEdit()
   }
 
   closeEdit = () => {
     this.editDialog.value = false
     this.editedIndex.value = -1
-    this.editedItem = reactive(deepCopy(defaultItem))
+    this.editedItem = reactive(deepCopy(this.editedItem))
+    this.editedItem.detail = ref('')
   }
 }
 
@@ -243,7 +229,7 @@ class DataTable {
       {
         title: 'Detail',
         key: 'detail',
-        width: '35%',
+        width: '45%',
       },
       {
         title: 'Slot',
@@ -255,11 +241,6 @@ class DataTable {
         title: 'Location',
         key: 'location',
         width: '15%',
-      },
-      {
-        title: 'Action',
-        key: 'actions',
-        width: '10%',
       },
     ]
 

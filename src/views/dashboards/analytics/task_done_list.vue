@@ -28,9 +28,25 @@ onMounted(async () => {
     <!--  添加条目，添加类别，搜索框的功能栏 -->
     <VCardText>
       <VRow>
+        <!-- 搜索框 -->
+        <VCol
+          class="d-flex justify-start"
+          cols="4"
+          md="4"
+        >
+          <VTextField
+            v-model="dataTable.search"
+            append-inner-icon="tabler-search"
+            clearable
+            label="Search"
+            variant="underlined"
+          />
+        </VCol>
+
+
         <!-- 按钮区域 -->
         <VCol
-          class="d-flex align-center"
+          class="d-flex align-center justify-end"
           cols="8"
           md="8"
         >
@@ -67,38 +83,22 @@ onMounted(async () => {
 
           </div>
         </VCol>
-
-        <!-- 搜索框 -->
-        <VCol
-          class="d-flex justify-end"
-          cols="4"
-          md="4"
-        >
-          <AppTextField
-            v-model="dataTable.search"
-            append-inner-icon="tabler-search"
-            dense
-            density="compact"
-            hide-details
-            outlined
-            placeholder="Search"
-            single-line
-          />
-        </VCol>
       </VRow>
     </VCardText>
+    <VCardItem style="position: relative;">
 
-    <div style="position: relative;">
       <!-- Data table -->
       <VDataTable
         :headers="dataTable.headers"
         :items="dataTable.tableItems"
+
         :items-per-page="dataTable.options.itemsPerPage"
         :page="dataTable.options.page"
         :search="dataTable.search"
         :sort-by="dataTable.options.sortBy"
         :sort-desc="dataTable.options.sortDesc"
         @update:options="dataTable.options = $event"
+        @click:row="itemEditDialog.editConfirm"
       >
         <!--      no-data-state -->
         <template #no-data>
@@ -160,18 +160,6 @@ onMounted(async () => {
             </VChip>
           </div>
         </template>
-
-        <!-- actions -->
-        <template #item.actions="{ item }">
-          <div class="d-flex gap-1">
-            <IconBtn @click="itemEditDialog.editConfirm(item.raw, dataTable.tableItems)">
-              <VIcon icon="mdi-pencil-outline"/>
-            </IconBtn>
-            <IconBtn @click="itemEditDialog.deleteConfirm(item.raw, dataTable.tableItems)">
-              <VIcon icon="mdi-delete-outline"/>
-            </IconBtn>
-          </div>
-        </template>
         <!--    底部显示条数 -->
         <template #bottom>
           <VCardText class="pt-2">
@@ -206,164 +194,142 @@ onMounted(async () => {
         </template>
       </VDataTable>
 
-    </div>
+
+    </VCardItem>
+
 
     <!-- 👉 Edit item Dialog  -->
     <VDialog
       v-model="itemEditDialog.editDialog"
+      @click:outside="itemEditDialog.closeEdit"
       max-width="600px"
     >
+      <!-- Dialog close btn -->
+      <DialogCloseBtn @click="itemEditDialog.closeEdit"/>
       <VCard>
         <VCardTitle>
           <span class="headline">Edit Task</span>
         </VCardTitle>
         <VCardText>
-          <VContainer>
-            <VRow>
-              <!-- category（类别） -->
-              <VCol
-                cols="12"
-                md="4"
-                sm="4"
-              >
-                <AppAutocomplete
-                  v-model="itemEditDialog.editedItem.category"
-                  :items="itemCategoryEditDialog.allLists.category"
-                  chips
-                  closable-chips
-                  label="Category"
-                  multiple
-                  variant="outlined"
-                />
-              </VCol>
 
-              <!-- task（任务） -->
-              <VCol
-                cols="12"
-                md="4"
-                sm="4"
-              >
-                <AppAutocomplete
-                  v-model="itemEditDialog.editedItem.task"
-                  :items="itemCategoryEditDialog.allLists.task"
-                  chips
-                  closable-chips
-                  label="Task"
-                  multiple
-                  outlined
-                />
-              </VCol>
+          <VRow>
+            <!-- category（类别） -->
+            <VCol
+              cols="12"
+              md="4"
+              sm="4"
+            >
+              <AppAutocomplete
+                v-model="itemEditDialog.editedItem.category"
+                :items="itemCategoryEditDialog.allLists.category"
+                chips
+                closable-chips
+                label="Category"
+                multiple
+                variant="outlined"
+              />
+            </VCol>
 
-              <!-- location（地点） -->
-              <VCol
-                cols="12"
-                md="4"
-                sm="4"
-              >
-                <AppAutocomplete
-                  v-model="itemEditDialog.editedItem.location"
-                  :items="itemCategoryEditDialog.allLists.location"
-                  chips
-                  closable-chips
-                  label="Location"
-                  multiple
-                  outlined
-                />
-              </VCol>
+            <!-- task（任务） -->
+            <VCol
+              cols="12"
+              md="4"
+              sm="4"
+            >
+              <AppAutocomplete
+                v-model="itemEditDialog.editedItem.task"
+                :items="itemCategoryEditDialog.allLists.task"
+                chips
+                closable-chips
+                label="Task"
+                multiple
+                outlined
+              />
+            </VCol>
 
-              <!-- date（日期） -->
-              <VCol
-                cols="12"
-                md="6"
-                sm="6"
-              >
-                <VTextField
-                  v-model="itemEditDialog.editedItem.date"
-                  label="Date"
-                  outlined
-                />
-              </VCol>
-              <!-- slot（时间段） -->
-              <VCol
-                cols="12"
-                md="6"
-                sm="6"
-              >
-                <VTextField
-                  v-model="itemEditDialog.editedItem.slot"
-                  label="Slot"
-                  outlined
-                />
-              </VCol>
-              <!-- detail（详细） -->
-              <VCol cols="12">
-                <VTextarea
-                  v-model="itemEditDialog.editedItem.detail"
-                  auto-grow
-                  label="Detail"
-                  outlined
-                />
-              </VCol>
-            </VRow>
-          </VContainer>
+            <!-- location（地点） -->
+            <VCol
+              cols="12"
+              md="4"
+              sm="4"
+            >
+              <AppAutocomplete
+                v-model="itemEditDialog.editedItem.location"
+                :items="itemCategoryEditDialog.allLists.location"
+                chips
+                closable-chips
+                label="Location"
+                multiple
+                outlined
+              />
+            </VCol>
+
+            <!-- date（日期） -->
+            <VCol
+              cols="12"
+              md="6"
+              sm="6"
+            >
+              <VTextField
+                v-model="itemEditDialog.editedItem.date"
+                label="Date"
+                outlined
+              />
+            </VCol>
+            <!-- slot（时间段） -->
+            <VCol
+              cols="12"
+              md="6"
+              sm="6"
+            >
+              <VTextField
+                v-model="itemEditDialog.editedItem.slot"
+                label="Slot"
+                outlined
+              />
+            </VCol>
+            <!-- detail（详细） -->
+            <VCol cols="12">
+              <VTextarea
+                v-model="itemEditDialog.editedItem.detail"
+                auto-grow
+                label="Detail"
+                outlined
+              />
+            </VCol>
+          </VRow>
+
         </VCardText>
-
-        <VCardActions>
-          <VSpacer/>
-
+        <VCardText class="d-flex justify-end flex-wrap gap-3">
+          <!--          delete button ❌-->
           <VBtn
+            v-if="itemEditDialog.editedIndex !== -1"
             color="error"
-            variant="outlined"
-            @click="itemEditDialog.closeEdit"
-          >
-            cancel
-          </VBtn>
-
-          <VBtn
-            color="success"
-            variant="elevated"
-            @click="itemEditDialog.editItem(dataTable.tableItems)"
-          >
-            save
-          </VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
-
-    <!-- 👉 Delete item Dialog  -->
-    <VDialog
-      v-model="itemEditDialog.deleteDialog"
-      max-width="500px"
-    >
-      <VCard>
-        <VCardTitle>
-          Are you sure you want to delete this item?
-        </VCardTitle>
-
-        <VCardActions>
-          <VSpacer/>
-
-          <VBtn
-            color="error"
-            variant="outlined"
-            @click="itemEditDialog.closeDelete"
-          >
-            Cancel
-          </VBtn>
-
-          <VBtn
-            color="success"
-            variant="elevated"
+            variant="tonal"
             @click="itemEditDialog.deleteItem(dataTable.tableItems)"
           >
-            OK
+            <VIcon
+              icon="tabler-circle-minus"
+              start
+            />
+            Delete
           </VBtn>
+          <!-- confirm button✅-->
+          <VBtn
+            color="success"
+            variant="tonal"
+            @click="itemEditDialog.editItem(dataTable.tableItems)"
+          >
 
-          <VSpacer/>
-        </VCardActions>
+            Accept
+            <VIcon
+              end
+              icon="tabler-checkbox"
+            />
+          </VBtn>
+        </VCardText>
       </VCard>
     </VDialog>
-
     <!-- 👉 Add categories Dialog -->
     <VDialog
       v-model="itemCategoryEditDialog.categoryDialog"
