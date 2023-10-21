@@ -50,6 +50,7 @@ const uploadFile = async () => {
         v-model="password"
         label="password"
         variant="underlined"
+        clearable
       />
     </VCardText>
     <VCardItem>

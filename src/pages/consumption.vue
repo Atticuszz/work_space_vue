@@ -8,7 +8,6 @@
       <file_uploader/>
     </VCol>
 
-
   </VRow>
 
 </template>
