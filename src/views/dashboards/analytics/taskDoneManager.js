@@ -5,11 +5,12 @@ import axios from '@axios'
 
 const defaultItem = {
   date: '',
-  category: null,
-  task: null,
+  category: [],
+  task: [],
+  target: [],
   detail: '',
   slot: '',
-  location: null,
+  location: [],
 }
 
 const getRandomChipColor = () => {
@@ -36,11 +37,17 @@ class ItemEditDialog {
     this.editDialog = ref(false)
     this.editedIndex = ref(-1)
     this.editedItem = reactive(defaultItem)
-    this.deleteDialog = ref(false)
-    console.log('ItemEditDialog constructor is called')
+    this.searchInput = {
+      location: null,
+      category: null,
+      target: null,
+      task: null,
+    }
+
+    // console.log('ItemEditDialog constructor is called')
   }
 
-  editConfirm = (evnent, { item }) => {
+  editConfirm = (event, { item }) => {
     // 在data中找到需要修改的对象和他的索引，并打开编辑对话框
     // console.log("event:",evnent)
     // console.log("item:",item.value)
@@ -54,7 +61,34 @@ class ItemEditDialog {
     this.editDialog.value = true
   }
 
-  editItem = async () => {
+  onSearchInput = (newValue, listname) => {
+    console.log('newvalue:', newValue, 'listname:', listname)
+    this.searchInput[listname] = newValue
+  }
+
+  setItemContent = (event, listname) => {
+    // console.log('Event Target:', event.target)
+    // console.log('Event Current Target:', event.currentTarget)
+    // console.log('this.searchInput:', this.searchInput)
+    // set chosen value to v-model
+    const chosen = this.searchInput[listname]
+    if (chosen.length === 0) {
+      return
+    }
+    this.editedItem[listname].push(chosen)
+    this.searchInput[listname] = ''
+    // no-exist
+    if (itemCategoryEditDialog.allLists[listname].indexOf(chosen) === -1) {
+      itemCategoryEditDialog.newItemCategories[listname] = chosen
+      itemCategoryEditDialog.addCatItem(listname)
+    }
+
+  }
+
+  editItem = async event => {
+    // console.log("event:",event)
+    // console.log('Event Target:', event.target)
+    // console.log('Event Current Target:', event.currentTarget)
     workingTasks.value++
     let rawData = deepCopy(this.editedItem)
 
@@ -63,8 +97,8 @@ class ItemEditDialog {
       rawData.uuid = uuidv4()
     }
 
-    // Convert the 'location' array to a string
-    rawData.location = rawData.location.join(',')
+    // // Convert the 'location' array to a string
+    // rawData.location = rawData.location.join(',')
 
     // Prepare the URL and method for Axios based on whether it's an update or new entry
     let url = 'http://localhost:5000/task_entries/add_entry'
@@ -74,7 +108,7 @@ class ItemEditDialog {
       method = 'put'
     }
     rawData = JSON.stringify(rawData)
-
+    console.log('rawData', rawData)
     axios({
       url,
       method,
@@ -109,7 +143,6 @@ class ItemEditDialog {
 
     axios.delete(`http://localhost:5000/task_entries/delete_entry/${uuid}`)
       .then(response => {
-
         dataTable.fetchData()
       })
       .catch(error => {
@@ -141,26 +174,37 @@ class ItemCategoryEditDialog {
     this.allLists = reactive({
       task: [],
       location: [],
+      target: [],
       category: [],
     })
     this.newItemCategories = reactive({
       category: '',
       task: '',
+      target: '',
       location: '',
     })
-    console.log('ItemCategoryEditDialog constructor is called')
+
+    // console.log('ItemCategoryEditDialog constructor is called')
   }
 
   init_category = async () => {
-    console.log('init_category ...')
+    // console.log('init_category ...')
+    workingTasks.value++
+    axios.get('http://localhost:5000/task_categories/get_all_task_category').then(response => {
+      this.allLists = reactive(response.data)
 
-    const response = await axios.get('http://localhost:5000/task_categories/get_all_task_category')
-
-    this.allLists = reactive(response.data)
+      // console.log("data:",response.data)
+    })
+      .catch(error => {
+        console.error('There was a problem with init_category:', error)
+      })
+      .finally(() => {
+        workingTasks.value--
+      })
   }
 
-  addCatItem = async (itemList, listName) => {
-    console.log('Called addCatItem is called')
+  addCatItem = async listName => {
+    // console.log('Called addCatItem is called')
     workingTasks.value++ // 增加正在进行的异步任务的数量
 
     const newItem = this.newItemCategories[listName].trim()
@@ -168,7 +212,7 @@ class ItemCategoryEditDialog {
       axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, { add: newItem })
         .then(response => {
           if (response.data) {
-            itemList.push(newItem)
+            this.allLists[listName].push(newItem)
           }
         })
         .catch(error => {
@@ -181,16 +225,17 @@ class ItemCategoryEditDialog {
     this.newItemCategories[listName] = ''
   }
 
-  removeCatItem = async (itemList, index, listName) => {
-    console.log('Called removeCatItem is called')
+  removeCatItem = async (index, listName) => {
+    // console.log('Called removeCatItem is called')
     workingTasks.value++ // 增加正在进行的异步任务的数量
 
-    const itemToRemove = itemList[index]
+    const itemToRemove = this.allLists[listName][index]
 
+    // console.log("itemToRemove:",itemToRemove)
     axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, { remove: itemToRemove })
       .then(response => {
         if (response.data) {
-          itemList.splice(index, 1)
+          this.allLists[listName].splice(index, 1)
         }
       })
       .catch(error => {
@@ -217,6 +262,12 @@ class DataTable {
         width: '10%',
       },
       {
+        title: 'Slot',
+        key: 'slot',
+        sortable: true,
+        width: '10%',
+      },
+      {
         title: 'Category',
         key: 'category',
         width: '10%',
@@ -227,21 +278,21 @@ class DataTable {
         width: '10%',
       },
       {
-        title: 'Detail',
-        key: 'detail',
-        width: '45%',
-      },
-      {
-        title: 'Slot',
-        key: 'slot',
-        sortable: true,
+        title: 'target',
+        key: 'target',
         width: '10%',
       },
       {
         title: 'Location',
         key: 'location',
-        width: '15%',
+        width: '5%',
       },
+      {
+        title: 'Detail',
+        key: 'detail',
+        width: '45%',
+      },
+
     ]
 
     // 表格数据
@@ -254,7 +305,7 @@ class DataTable {
       sortBy: ['slot', 'date'], // 首先按 'slot' 排序，然后按 'date' 排序
       sortDesc: [true, true], // 'slot' 升序，'date' 升序
     })
-    console.log('DataTable constructor is called')
+    // console.log('DataTable constructor is called')
   }
 
   fetchData = async () => {
@@ -266,7 +317,7 @@ class DataTable {
         const all_data = response.data
 
         this.tableItems.value = all_data.map(reactive(item => {
-          const location = item.location.split(',')
+          // const location = item.location.split(',')
 
           return {
             uuid: item.uuid,
@@ -275,7 +326,8 @@ class DataTable {
             task: item.task,
             detail: item.detail,
             slot: item.slot,
-            location,
+            target: item.target,
+            location: item.location,
           }
         }))
       })

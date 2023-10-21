@@ -43,7 +43,6 @@ onMounted(async () => {
           />
         </VCol>
 
-
         <!-- 按钮区域 -->
         <VCol
           class="d-flex align-center justify-end"
@@ -68,8 +67,8 @@ onMounted(async () => {
               variant="tonal"
               @click="itemCategoryEditDialog.categoryDialog = true"
             >
-              <VIcon size="20"
-              >mdi-tag
+              <VIcon size="20">
+                mdi-tag
               </VIcon>
             </VBtn>
             <VBtn
@@ -80,13 +79,11 @@ onMounted(async () => {
               variant="tonal"
               @click="itemCategoryEditDialog.categoryDialog = true"
             />
-
           </div>
         </VCol>
       </VRow>
     </VCardText>
     <VCardItem style="position: relative;">
-
       <!-- Data table -->
       <VDataTable
         :headers="dataTable.headers"
@@ -144,6 +141,22 @@ onMounted(async () => {
             </VChip>
           </div>
         </template>
+        <!-- target -->
+        <template #item.target="{ item }">
+          <div
+            v-for="(target, index) in item.raw.target"
+            :key="index"
+            :style="{ overflow: 'auto', maxWidth: '100%' }"
+            class="d-flex flex-wrap"
+          >
+            <VChip
+              :color="getRandomChipColor()"
+              :style="{ margin: '0 4px 4px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }"
+            >
+              {{ target }}
+            </VChip>
+          </div>
+        </template>
         <!-- 自定义location列 -->
         <template #item.location="{ item }">
           <div
@@ -193,25 +206,21 @@ onMounted(async () => {
           </VCardText>
         </template>
       </VDataTable>
-
-
     </VCardItem>
-
 
     <!-- 👉 Edit item Dialog  -->
     <VDialog
       v-model="itemEditDialog.editDialog"
-      @click:outside="itemEditDialog.closeEdit"
       max-width="600px"
+      @click:outside="itemEditDialog.closeEdit"
     >
       <!-- Dialog close btn -->
       <DialogCloseBtn @click="itemEditDialog.closeEdit"/>
-      <VCard>
-        <VCardTitle>
-          <span class="headline">Edit Task</span>
-        </VCardTitle>
-        <VCardText>
-
+      <VCard
+        prepend-icon="tabler-edit"
+        title="Editing"
+      >
+        <VCardItem>
           <VRow>
             <!-- category（类别） -->
             <VCol
@@ -219,14 +228,16 @@ onMounted(async () => {
               md="4"
               sm="4"
             >
-              <AppAutocomplete
+              <VAutocomplete
                 v-model="itemEditDialog.editedItem.category"
                 :items="itemCategoryEditDialog.allLists.category"
+                append-inner-icon="tabler-tags"
                 chips
                 closable-chips
-                label="Category"
                 multiple
-                variant="outlined"
+                variant="underlined"
+                @click:append-inner="event => itemEditDialog.setItemContent(event, 'category')"
+                @update:search="newValue => itemEditDialog.onSearchInput(newValue, 'category')"
               />
             </VCol>
 
@@ -236,72 +247,94 @@ onMounted(async () => {
               md="4"
               sm="4"
             >
-              <AppAutocomplete
+              <VAutocomplete
                 v-model="itemEditDialog.editedItem.task"
                 :items="itemCategoryEditDialog.allLists.task"
+                append-inner-icon="tabler-school"
                 chips
                 closable-chips
-                label="Task"
                 multiple
-                outlined
+                variant="underlined"
+                @click:append-inner="event => itemEditDialog.setItemContent(event, 'task')"
+                @update:search="newValue => itemEditDialog.onSearchInput(newValue, 'task')"
               />
             </VCol>
-
-            <!-- location（地点） -->
+            <!-- target（具体任务对象） -->
             <VCol
               cols="12"
               md="4"
               sm="4"
             >
-              <AppAutocomplete
-                v-model="itemEditDialog.editedItem.location"
-                :items="itemCategoryEditDialog.allLists.location"
+              <VAutocomplete
+                v-model="itemEditDialog.editedItem.target"
+                :items="itemCategoryEditDialog.allLists.target"
+                append-inner-icon="tabler-note"
                 chips
                 closable-chips
-                label="Location"
                 multiple
-                outlined
+                variant="underlined"
+                @click:append-inner="event => itemEditDialog.setItemContent(event, 'target')"
+                @update:search="newValue => itemEditDialog.onSearchInput(newValue, 'target')"
               />
             </VCol>
 
             <!-- date（日期） -->
             <VCol
               cols="12"
-              md="6"
-              sm="6"
+              md="4"
+              sm="4"
             >
               <VTextField
                 v-model="itemEditDialog.editedItem.date"
-                label="Date"
-                outlined
+                append-inner-icon="tabler-calendar"
+                variant="underlined"
               />
             </VCol>
             <!-- slot（时间段） -->
             <VCol
               cols="12"
-              md="6"
-              sm="6"
+              md="4"
+              sm="4"
             >
               <VTextField
                 v-model="itemEditDialog.editedItem.slot"
-                label="Slot"
-                outlined
+                append-inner-icon="tabler-24-hours"
+                variant="underlined"
               />
             </VCol>
+            <!-- location（地点） -->
+            <VCol
+              cols="12"
+              md="4"
+              sm="4"
+            >
+              <VAutocomplete
+                v-model="itemEditDialog.editedItem.location"
+                :items="itemCategoryEditDialog.allLists.location"
+                append-inner-icon="tabler-current-location"
+                chips
+                closable-chips
+                multiple
+                variant="underlined"
+                @click:append-inner="event => itemEditDialog.setItemContent(event, 'location')"
+                @update:search="newValue => itemEditDialog.onSearchInput(newValue, 'location')"
+              />
+            </VCol>
+
             <!-- detail（详细） -->
             <VCol cols="12">
               <VTextarea
                 v-model="itemEditDialog.editedItem.detail"
                 auto-grow
-                label="Detail"
-                outlined
+
+                clearable
+                variant="solo-filled"
               />
             </VCol>
           </VRow>
-
-        </VCardText>
+        </VCardItem>
         <VCardText class="d-flex justify-end flex-wrap gap-3">
-          <!--          delete button ❌-->
+          <!--          delete button ❌ -->
           <VBtn
             v-if="itemEditDialog.editedIndex !== -1"
             color="error"
@@ -314,13 +347,12 @@ onMounted(async () => {
             />
             Delete
           </VBtn>
-          <!-- confirm button✅-->
+          <!-- confirm button✅ -->
           <VBtn
             color="success"
             variant="tonal"
-            @click="itemEditDialog.editItem(dataTable.tableItems)"
+            @click="itemEditDialog.editItem"
           >
-
             Accept
             <VIcon
               end
@@ -335,10 +367,9 @@ onMounted(async () => {
       v-model="itemCategoryEditDialog.categoryDialog"
       max-width="800px"
     >
-      <VCard>
-        <VCardTitle>
-          Manage Categories
-        </VCardTitle>
+      <!-- Dialog close btn -->
+      <DialogCloseBtn @click="itemCategoryEditDialog.categoryDialog = false"/>
+      <VCard title="Manage Categories">
         <VCardText>
           <VRow>
             <!-- Loop through different category types -->
@@ -356,7 +387,7 @@ onMounted(async () => {
                 <VChip
                   :color="getRandomChipColor()"
                   closable
-                  @click:close="itemCategoryEditDialog.removeCatItem(itemList, index, listName)"
+                  @click:close="itemCategoryEditDialog.removeCatItem(index, listName)"
                 >
                   {{ item }}
                 </VChip>
@@ -364,25 +395,14 @@ onMounted(async () => {
               <!-- Text field for entering new items -->
               <VTextField
                 v-model="itemCategoryEditDialog.newItemCategories[listName]"
+                append-inner-icon="mdi-plus"
                 class="mb-0"
-                dense
-                hide-details
-                label="New Category"
-                outlined
-                prepend-inner-icon="mdi-plus"
-                @click:prepend-inner="itemCategoryEditDialog.addCatItem(itemList, listName)"
+                variant="solo-filled"
+                @click:append-inner="itemCategoryEditDialog.addCatItem(listName)"
               />
             </VCol>
           </VRow>
         </VCardText>
-        <VCardActions>
-          <VBtn
-            color="error"
-            @click="itemCategoryEditDialog.categoryDialog = false"
-          >
-            Cancel
-          </VBtn>
-        </VCardActions>
       </VCard>
     </VDialog>
   </VCard>

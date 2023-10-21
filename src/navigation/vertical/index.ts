@@ -3,9 +3,9 @@ import type { VerticalNavItems } from '@/@layouts/types'
 
 export default [
   ...dashboard, {
-    title: 'Home',
-    to: { name: 'index' },
-    icon: { icon: 'tabler-smart-home' },
+    title: 'consumption',
+    to: { name: 'consumption' },
+    icon: { icon: 'tabler-brand-cashapp' },
   },
   {
     title: 'Second page',
