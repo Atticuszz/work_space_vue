@@ -8,8 +8,8 @@ export default [
     icon: { icon: 'tabler-brand-cashapp' },
   },
   {
-    title: 'Second page',
-    to: { name: 'second-page' },
+    title: 'test-page',
+    to: { name: 'test-page' },
     icon: { icon: 'tabler-file' },
   },
 ] as VerticalNavItems
