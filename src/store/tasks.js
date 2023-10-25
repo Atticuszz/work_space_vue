@@ -1,17 +1,17 @@
-import { defineStore } from 'pinia'
-import { v4 as uuidv4 } from 'uuid'
+import {defineStore} from 'pinia'
+import {v4 as uuidv4} from 'uuid'
 import axios from '@axios' // Assuming you are using axios for HTTP requests
 
 const defaultItem
   = {
-  date: '',
-  category: [],
-  task: [],
-  target: [],
-  detail: '',
-  slot: '',
-  location: [],
-  uuid: '',
+    date: '',
+    category: [],
+    task: [],
+    target: [],
+    detail: '',
+    slot: '',
+    location: [],
+    uuid: '',
 }
 
 export const useTasksStore = defineStore({
@@ -126,21 +126,21 @@ export const useTasksStore = defineStore({
           return {
             uuid: item.uuid,
             date: item.date,
-            category: item.category,
-            task: item.task,
-            detail: item.detail,
-            slot: item.slot,
-            target: item.target,
-            location: item.location,
+              category: item.category,
+              task: item.task,
+              detail: item.detail,
+              slot: item.slot,
+              target: item.target,
+              location: item.location,
           }
         })
 
-        // console.log('this.tableItems:', this.tableItems)
+          // console.log('this.tableItems:', this.tableItems)
       } catch (error) {
-        console.error('There was a problem fetching data:', error)
+          console.error('There was a problem fetching data:', error)
       } finally {
-        this.workingTasks-- // 减少正在进行的异步任务的数量
-        this.loading = false
+          this.workingTasks-- // 减少正在进行的异步任务的数量
+          this.loading = false
       }
     },
 
@@ -149,9 +149,8 @@ export const useTasksStore = defineStore({
       console.log('item:', item)
       if (!item.uuid)
         this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
-      else {
+      else
         this.editedItem = item
-      }
 
       this.editDialog = true
     },
@@ -182,20 +181,20 @@ export const useTasksStore = defineStore({
       // Make your API call to add a task
       this.workingTasks++
       try {
-        const data_to_upsert = JSON.stringify(this.editedItem)
-        const url = 'http://localhost:5000/task_entries/upsert_entry'
+          const data_to_upsert = JSON.stringify(this.editedItem)
+          const url = 'http://localhost:5000/task_entries/upsert_entry'
 
-        console.log('data_to_upsert', data_to_upsert)
-        await axios({
-          url,
-          method: 'post',
-          headers: { 'Content-Type': 'application/json' },
-          data: data_to_upsert,
-        })
+          console.log('data_to_upsert', data_to_upsert)
+          await axios({
+              url,
+              method: 'post',
+              headers: {'Content-Type': 'application/json'},
+              data: data_to_upsert,
+          })
       } catch (error) {
-        console.error('There was a problem with upsertTask:', error)
+          console.error('There was a problem with upsertTask:', error)
       } finally {
-        this.workingTasks--
+          this.workingTasks--
       }
     },
     async deleteTask() {
@@ -207,15 +206,15 @@ export const useTasksStore = defineStore({
       const url = `http://localhost:5000/task_entries/delete_entry/${uuid}`
 
       this.workingTasks++
-      try {
-        await axios.delete(url)
-        await this.fetchData()
-      } catch (error) {
-        console.error('There was a problem with deleteTask:', error)
-      } finally {
-        this.workingTasks--
-        this.closeEditDialog()
-      }
+        try {
+            await axios.delete(url)
+            await this.fetchData()
+        } catch (error) {
+            console.error('There was a problem with deleteTask:', error)
+        } finally {
+            this.workingTasks--
+            this.closeEditDialog()
+        }
     },
     async saveEditedItem() {
       this.editDialog = false
@@ -242,15 +241,15 @@ export const useTasksStore = defineStore({
     async initCategory() {
       // console.log('init_category ...')
       this.workingTasks++
-      try {
-        const response = await axios.get('http://localhost:5000/task_categories/get_all_task_category')
+        try {
+            const response = await axios.get('http://localhost:5000/task_categories/get_all_task_category')
 
-        this.allLists = response.data
-      } catch (error) {
-        console.error('There was a problem with init_category:', error)
-      } finally {
-        this.workingTasks--
-      }
+            this.allLists = response.data
+        } catch (error) {
+            console.error('There was a problem with init_category:', error)
+        } finally {
+            this.workingTasks--
+        }
     },
     async addCategory(listName) {
       console.log('Called addCategory is called')
@@ -259,15 +258,15 @@ export const useTasksStore = defineStore({
       if (newItem !== '') {
         this.workingTasks++
         console.log('add newItem:', newItem)
-        try {
-          await axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, { add: newItem })
-          await this.initCategory()
-        } catch (error) {
-          console.error('There was a problem adding category:', error)
-        } finally {
-          this.workingTasks--
-          this.newItemCategories[listName] = ''
-        }
+          try {
+              await axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, {add: newItem})
+              await this.initCategory()
+          } catch (error) {
+              console.error('There was a problem adding category:', error)
+          } finally {
+              this.workingTasks--
+              this.newItemCategories[listName] = ''
+          }
       }
     },
     async removeCatItem(index, listName) {
@@ -275,14 +274,14 @@ export const useTasksStore = defineStore({
       this.workingTasks++ // 增加正在进行的异步任务的数量
 
       const itemToRemove = this.allLists[listName][index]
-      try {
-        await axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, { remove: itemToRemove })
-        await this.initCategory()
-      } catch (error) {
-        console.error('There was a problem deleting category:', error)
-      } finally {
-        this.workingTasks--
-      }
+        try {
+            await axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, {remove: itemToRemove})
+            await this.initCategory()
+        } catch (error) {
+            console.error('There was a problem deleting category:', error)
+        } finally {
+            this.workingTasks--
+        }
     },
   },
 })
