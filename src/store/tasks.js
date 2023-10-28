@@ -1,19 +1,19 @@
+// eslint-disable-next-line valid-appcardcode-code-prop
+import { deleteTask, fetchAllCategories, fetchAllTasks, upsertCategory, upsertTask } from '@/store/api'
 import { defineStore } from 'pinia'
 import { v4 as uuidv4 } from 'uuid'
 import { watch } from 'vue'
-import { deleteTask, fetchAllCategories, fetchAllTasks, upsertCategory, upsertTask } from '@/store/api'
-
 
 const defaultItem
   = {
-    date: '',
-    category: [],
-    task: [],
-    target: [],
-    detail: '',
-    slot: '',
-    location: [],
-    uuid: '',
+  date: '',
+  category: [],
+  task: [],
+  target: [],
+  detail: '',
+  slot: '',
+  location: [],
+  uuid: '',
 }
 
 export const useTasksStore = defineStore({
@@ -186,7 +186,6 @@ export const useTasksStore = defineStore({
       console.log('item:', item)
       if (!item.uuid) {
         this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
-        this.editedItem.uuid = uuidv4()
       } else {
         this.editedItem = item
       }
@@ -218,6 +217,10 @@ export const useTasksStore = defineStore({
     },
     async saveEditedItem() {
       this.editDialog = false
+      if (this.editedItem.uuid === '') {
+        this.editedItem.uuid = uuidv4()
+        this.tableItems.push(this.editedItem)
+      }
       this.saveEdit = !this.saveEdit
     },
     deleteTask() {

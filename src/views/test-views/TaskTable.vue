@@ -1,9 +1,8 @@
 <script setup>
+import { useTasksStore } from '@/store/tasks'
 import { onMounted } from 'vue'
 
 import { VDataTable } from 'vuetify/labs/VDataTable'
-
-import { useTasksStore } from '@/store/tasks'
 
 const tasksStore = useTasksStore()
 
@@ -45,8 +44,10 @@ onMounted(async () => {
             <VDialog
               v-model="tasksStore.editDialog"
               max-width="600px"
-              @click:outside="()=>{tasksStore.editDialog = false
-              tasksStore.resetEditItem()}"
+              @click:outside="() => {
+                tasksStore.editDialog = false
+                tasksStore.resetEditItem()
+              }"
             >
               <!-- Dialog Activator -->
               <template #activator="{ props }">
@@ -63,8 +64,11 @@ onMounted(async () => {
                 </VBtn>
               </template>
               <!-- Dialog close btn -->
-              <DialogCloseBtn @click="()=>{tasksStore.editDialog=false
-              tasksStore.resetEditItem()}"
+              <DialogCloseBtn
+                @click="() => {
+                  tasksStore.editDialog = false
+                  tasksStore.resetEditItem()
+                }"
               />
               <VCard
                 prepend-icon="tabler-edit"
@@ -261,7 +265,7 @@ onMounted(async () => {
                         append-inner-icon="mdi-plus"
                         class="mb-0"
                         variant="solo-filled"
-                        @click:append-inner="tasksStore.updateCategory(-1,listName)"
+                        @click:append-inner="tasksStore.updateCategory(-1, listName)"
                       />
                     </VCol>
                   </VRow>
