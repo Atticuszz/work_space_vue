@@ -8,6 +8,9 @@ export default {
       size: 22,
     },
   },
+  VCard: {
+    variant: 'elevated',
+  },
   VAlert: {
     density: 'comfortable',
     VBtn: {

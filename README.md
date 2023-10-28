@@ -13,3 +13,7 @@
 ### done
 
 ## function update
+
+- 2023-10-25
+  - notification
+    - Add a notification system

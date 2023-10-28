@@ -1,6 +1,8 @@
-import {defineStore} from 'pinia'
-import {v4 as uuidv4} from 'uuid'
-import axios from '@axios' // Assuming you are using axios for HTTP requests
+import { defineStore } from 'pinia'
+import { v4 as uuidv4 } from 'uuid'
+import { watch } from 'vue'
+import { deleteTask, fetchAllCategories, fetchAllTasks, upsertCategory, upsertTask } from '@/store/api'
+
 
 const defaultItem
   = {
@@ -81,6 +83,8 @@ export const useTasksStore = defineStore({
       target: null,
       task: null,
     },
+    saveEdit: false,
+    deleteUuid: null, // 需要删除的对象的 UUID
 
     // category data
     allLists: {
@@ -96,6 +100,8 @@ export const useTasksStore = defineStore({
       location: '',
     },
     categoryDialog: false,
+    saveCategory: false,
+    categoryUuid: null,
 
   }),
 
@@ -106,6 +112,67 @@ export const useTasksStore = defineStore({
   },
 
   actions: {
+    async initTable() {
+      this.tableItems = await fetchAllTasks()
+      const fetchedData = await fetchAllCategories()
+      const {
+        uuid: categoryUuid,
+        ...allList
+      } = fetchedData
+      this.allLists = allList
+      this.categoryUuid = categoryUuid
+
+      // Watch saveEdit changes
+      watch(() => this.saveEdit, async () => {
+        if (this.editedItem) {
+          try {
+            this.workingTasks++
+            await upsertTask(this.editedItem)
+            this.tableItems = await fetchAllTasks()
+            this.resetEditItem()
+          } catch (error) {
+            console.error('There was a problem with upsertTask:', error)
+          } finally {
+            this.workingTasks--
+          }
+        }
+      })
+
+      // Watch deleteUuid changes
+      watch(() => this.deleteUuid, async newDeleteUuid => {
+        if (newDeleteUuid) {
+          try {
+            this.workingTasks++
+            await deleteTask(newDeleteUuid)
+            this.tableItems = await fetchAllTasks()
+            this.resetEditItem()
+          } catch (error) {
+            console.error('There was a problem with deleteTask:', error)
+          } finally {
+            this.workingTasks--
+          }
+        }
+      })
+
+      // TODO: Watch catergory changes
+      watch(() => this.saveCategory, async () => {
+        try {
+          this.workingTasks++
+          await upsertCategory({ uuid: this.categoryUuid, ...this.allLists })
+          const {
+            uuid: categoryUuid,
+            ...allList
+          } = fetchedData
+          this.allLists = allList
+          this.categoryUuid = categoryUuid
+        } catch (error) {
+          console.error('There was a problem with upsertCategory:', error)
+        } finally {
+          this.workingTasks--
+        }
+      })
+    },
+
     // tools
     getRandomChipColor() {
       const colors = ['success', 'error', 'warning', 'info', 'primary', 'secondary']
@@ -114,43 +181,15 @@ export const useTasksStore = defineStore({
       return colors[randomIndex]
     },
 
-    // table action
-    async fetchData() {
-      // console.log('Fetching data...')
-      this.loading = true
-      this.workingTasks++ // 增加正在进行的异步任务的数量
-      try {
-        const response = await axios.get('http://localhost:5000/task_entries/get_all_table_items')
-
-        this.tableItems = response.data.map(item => {
-          return {
-            uuid: item.uuid,
-            date: item.date,
-              category: item.category,
-              task: item.task,
-              detail: item.detail,
-              slot: item.slot,
-              target: item.target,
-              location: item.location,
-          }
-        })
-
-          // console.log('this.tableItems:', this.tableItems)
-      } catch (error) {
-          console.error('There was a problem fetching data:', error)
-      } finally {
-          this.workingTasks-- // 减少正在进行的异步任务的数量
-          this.loading = false
-      }
-    },
-
     // edit dialog action
     openEditDialog(item) {
       console.log('item:', item)
-      if (!item.uuid)
+      if (!item.uuid) {
         this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
-      else
+        this.editedItem.uuid = uuidv4()
+      } else {
         this.editedItem = item
+      }
 
       this.editDialog = true
     },
@@ -174,114 +213,33 @@ export const useTasksStore = defineStore({
         this.editedItem[listname].push(chosen)
         this.autocompleteSearch[listname] = ''
         this.newItemCategories[listname] = chosen
-        await this.addCategory(listname)
+        this.updateCategory(-1, listname)
       }
-    },
-    async upsertTask() {
-      // Make your API call to add a task
-      this.workingTasks++
-      try {
-          const data_to_upsert = JSON.stringify(this.editedItem)
-          const url = 'http://localhost:5000/task_entries/upsert_entry'
-
-          console.log('data_to_upsert', data_to_upsert)
-          await axios({
-              url,
-              method: 'post',
-              headers: {'Content-Type': 'application/json'},
-              data: data_to_upsert,
-          })
-      } catch (error) {
-          console.error('There was a problem with upsertTask:', error)
-      } finally {
-          this.workingTasks--
-      }
-    },
-    async deleteTask() {
-      this.editDialog = false
-      this.tableItems.splice(this.editedIndex, 1)
-
-      // Make your API call to delete a task
-      const uuid = this.editedItem.uuid
-      const url = `http://localhost:5000/task_entries/delete_entry/${uuid}`
-
-      this.workingTasks++
-        try {
-            await axios.delete(url)
-            await this.fetchData()
-        } catch (error) {
-            console.error('There was a problem with deleteTask:', error)
-        } finally {
-            this.workingTasks--
-            this.closeEditDialog()
-        }
     },
     async saveEditedItem() {
       this.editDialog = false
-
-      // background do the following:
-      // 如果 editedIndex 是 -1，则是新任务；否则是更新任务
-      if (this.editedItem.uuid === '')
-        this.editedItem.uuid = uuidv4()
-
-      // database refresh
-      await this.upsertTask()
-      await this.fetchData()
-      this.closeEditDialog()
+      this.saveEdit = !this.saveEdit
     },
-    closeEditDialog() {
-      console.log('editItem:', this.editedItem)
+    deleteTask() {
       this.editDialog = false
+      this.tableItems.splice(this.editedIndex, 1)
+      this.deleteUuid = this.editedItem.uuid
+    },
+    resetEditItem() {
+      console.log('close:')
       this.editedItem = { ...this.editedItem }
       this.editedItem.detail = ''
       this.editedItem.uuid = ''
     },
-
     // category action
-    async initCategory() {
-      // console.log('init_category ...')
-      this.workingTasks++
-        try {
-            const response = await axios.get('http://localhost:5000/task_categories/get_all_task_category')
-
-            this.allLists = response.data
-        } catch (error) {
-            console.error('There was a problem with init_category:', error)
-        } finally {
-            this.workingTasks--
-        }
-    },
-    async addCategory(listName) {
-      console.log('Called addCategory is called')
-
-      const newItem = this.newItemCategories[listName].trim()
-      if (newItem !== '') {
-        this.workingTasks++
-        console.log('add newItem:', newItem)
-          try {
-              await axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, {add: newItem})
-              await this.initCategory()
-          } catch (error) {
-              console.error('There was a problem adding category:', error)
-          } finally {
-              this.workingTasks--
-              this.newItemCategories[listName] = ''
-          }
+    updateCategory(index, listname) {
+      if (index === -1) {
+        this.allLists[listname].push(this.newItemCategories[listname])
+        this.newItemCategories[listname] = ''
+      } else {
+        this.allLists[listname].splice(index, 1)
       }
-    },
-    async removeCatItem(index, listName) {
-      // console.log('Called removeCatItem is called')
-      this.workingTasks++ // 增加正在进行的异步任务的数量
-
-      const itemToRemove = this.allLists[listName][index]
-        try {
-            await axios.put(`http://localhost:5000/task_categories/update_category/${listName}`, {remove: itemToRemove})
-            await this.initCategory()
-        } catch (error) {
-            console.error('There was a problem deleting category:', error)
-        } finally {
-            this.workingTasks--
-        }
+      this.saveCategory = !this.saveCategory
     },
   },
 })

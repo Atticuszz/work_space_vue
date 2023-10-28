@@ -9,7 +9,8 @@ const tasksStore = useTasksStore()
 
 onMounted(async () => {
   if (tasksStore.tableItems.length === 0) {
-    await tasksStore.initTable()
+    await tasksStore.fetchData()
+    await tasksStore.initCategory()
   }
 })
 </script>
@@ -45,8 +46,7 @@ onMounted(async () => {
             <VDialog
               v-model="tasksStore.editDialog"
               max-width="600px"
-              @click:outside="()=>{tasksStore.editDialog = false
-              tasksStore.resetEditItem()}"
+              @click:outside="tasksStore.closeEditDialog"
             >
               <!-- Dialog Activator -->
               <template #activator="{ props }">
@@ -63,9 +63,7 @@ onMounted(async () => {
                 </VBtn>
               </template>
               <!-- Dialog close btn -->
-              <DialogCloseBtn @click="()=>{tasksStore.editDialog=false
-              tasksStore.resetEditItem()}"
-              />
+              <DialogCloseBtn @click="tasksStore.closeEditDialog"/>
               <VCard
                 prepend-icon="tabler-edit"
                 title="Editing"
@@ -250,7 +248,7 @@ onMounted(async () => {
                         <VChip
                           :color="tasksStore.getRandomChipColor()"
                           closable
-                          @click:close="tasksStore.updateCategory(index, listName)"
+                          @click:close="tasksStore.removeCatItem(index, listName)"
                         >
                           {{ item }}
                         </VChip>
@@ -261,7 +259,7 @@ onMounted(async () => {
                         append-inner-icon="mdi-plus"
                         class="mb-0"
                         variant="solo-filled"
-                        @click:append-inner="tasksStore.updateCategory(-1,listName)"
+                        @click:append-inner="tasksStore.addCategory(listName)"
                       />
                     </VCol>
                   </VRow>
@@ -292,7 +290,6 @@ onMounted(async () => {
         :search="tasksStore.tableSearch"
         :sort-by="tasksStore.options.sortBy"
         :sort-desc="tasksStore.options.sortDesc"
-        hover="true"
         @update:options="tasksStore.options = $event"
         @click:row="(event, { item }) => tasksStore.openEditDialog(item.value)"
       >

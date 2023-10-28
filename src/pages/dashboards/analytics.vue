@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import Task_done_list from "@/views/dashboards/analytics/task_done_list.vue"
 import { useTheme } from 'vuetify'
+import TaskTable from "@/views/test-views/TaskTable.vue"
 
-const vuetifyTheme = useTheme()
 </script>
 
 <template>
@@ -10,7 +9,7 @@ const vuetifyTheme = useTheme()
     <!-- 👉 Website analytics -->
     <VCol cols="12">
 
-    <task_done_list/>
+      <TaskTable/>
 
     </VCol>
   </VRow>

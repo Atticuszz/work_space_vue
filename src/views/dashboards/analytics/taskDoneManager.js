@@ -11,7 +11,6 @@ const defaultItem = {
   detail: '',
   slot: '',
   location: [],
-  uuid: '',
 }
 
 const getRandomChipColor = () => {
@@ -97,11 +96,8 @@ class ItemEditDialog {
     if (this.editedIndex.value === -1)
       rawData.uuid = uuidv4()
 
-    // // Convert the 'location' array to a string
-    // rawData.location = rawData.location.join(',')
-
     // Prepare the URL and method for Axios based on whether it's an update or new entry
-    let url = 'http://localhost:5000/task_entries/upsert_entry'
+    let url = 'http://localhost:5000/task_entries/add_entry'
     let method = 'post'
     if (this.editedIndex.value > -1) {
       url = `http://localhost:5000/task_entries/update_entry/${rawData.uuid}`
