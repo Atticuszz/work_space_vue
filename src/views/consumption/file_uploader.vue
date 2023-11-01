@@ -1,13 +1,15 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import axios from 'axios'
+import {ref} from 'vue'
+import axios from '@axios'
 
 const file = ref(null) // 注意这里初始化为 null
 const loading = ref(false)
 const password = ref('')
-
+// TODO: 请求统一到api端管理
+// TODO: 添加支付宝的跳转链接
 const uploadFile = async () => {
   loading.value = true // 开始上传，设置loading为true
+
   const formData = new FormData()
 
   if (file.value) {
@@ -30,10 +32,28 @@ const uploadFile = async () => {
 
   loading.value = false // 上传完成，设置loading为false
 }
+
+const externalLink = ref({
+  url: 'https://consumeprod.alipay.com/record/standard.htm',
+  label: '支付宝消费记录',
+  icon: 'mdi-download',
+})
 </script>
 
 <template>
   <VCard title="uploader">
+    <VCardItem>
+      <VListItem
+        :href="externalLink.url"
+        link
+        target="_blank"
+      >
+        <VListItemTitle>{{ externalLink.label }}</VListItemTitle>
+        <VListItemAction>
+          <VIcon>{{ externalLink.icon }}</VIcon>
+        </VListItemAction>
+      </VListItem>
+    </VCardItem>
     <VCardItem>
       <VFileInput
         v-model="file"
@@ -54,7 +74,9 @@ const uploadFile = async () => {
       />
     </VCardText>
     <VCardItem>
-      <VBtn @click="uploadFile">upload</VBtn>
+      <VBtn @click="uploadFile">
+        upload
+      </VBtn>
     </VCardItem>
   </VCard>
 </template>

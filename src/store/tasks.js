@@ -1,19 +1,19 @@
 // eslint-disable-next-line valid-appcardcode-code-prop
-import { deleteTask, fetchAllCategories, fetchAllTasks, upsertCategory, upsertTask } from '@/store/api'
-import { defineStore } from 'pinia'
-import { v4 as uuidv4 } from 'uuid'
-import { watch } from 'vue'
+import {defineStore} from 'pinia'
+import {v4 as uuidv4} from 'uuid'
+import {watch} from 'vue'
+import {deleteTask, fetchAllCategories, fetchAllTasks, upsertCategory, upsertTask} from '@/store/api'
 
 const defaultItem
   = {
-  date: '',
-  category: [],
-  task: [],
-  target: [],
-  detail: '',
-  slot: '',
-  location: [],
-  uuid: '',
+    date: '',
+    category: [],
+    task: [],
+    target: [],
+    detail: '',
+    slot: '',
+    location: [],
+    uuid: '',
 }
 
 export const useTasksStore = defineStore({
@@ -114,61 +114,66 @@ export const useTasksStore = defineStore({
   actions: {
     async initTable() {
       this.tableItems = await fetchAllTasks()
+
       const fetchedData = await fetchAllCategories()
+
       const {
         uuid: categoryUuid,
         ...allList
       } = fetchedData
+
       this.allLists = allList
       this.categoryUuid = categoryUuid
 
       // Watch saveEdit changes
       watch(() => this.saveEdit, async () => {
         if (this.editedItem) {
-          try {
-            this.workingTasks++
-            await upsertTask(this.editedItem)
-            this.tableItems = await fetchAllTasks()
-            this.resetEditItem()
-          } catch (error) {
-            console.error('There was a problem with upsertTask:', error)
-          } finally {
-            this.workingTasks--
-          }
+            try {
+                this.workingTasks++
+                await upsertTask(this.editedItem)
+                this.tableItems = await fetchAllTasks()
+                this.resetEditItem()
+            } catch (error) {
+                console.error('There was a problem with upsertTask:', error)
+            } finally {
+                this.workingTasks--
+            }
         }
       })
 
       // Watch deleteUuid changes
       watch(() => this.deleteUuid, async newDeleteUuid => {
         if (newDeleteUuid) {
-          try {
-            this.workingTasks++
-            await deleteTask(newDeleteUuid)
-            this.tableItems = await fetchAllTasks()
-            this.resetEditItem()
-          } catch (error) {
-            console.error('There was a problem with deleteTask:', error)
-          } finally {
-            this.workingTasks--
-          }
+            try {
+                this.workingTasks++
+                await deleteTask(newDeleteUuid)
+                this.tableItems = await fetchAllTasks()
+                this.resetEditItem()
+            } catch (error) {
+                console.error('There was a problem with deleteTask:', error)
+            } finally {
+                this.workingTasks--
+            }
         }
       })
 
       // TODO: Watch catergory changes
       watch(() => this.saveCategory, async () => {
         try {
-          this.workingTasks++
-          await upsertCategory({ uuid: this.categoryUuid, ...this.allLists })
-          const {
-            uuid: categoryUuid,
-            ...allList
-          } = fetchedData
-          this.allLists = allList
-          this.categoryUuid = categoryUuid
+            this.workingTasks++
+            await upsertCategory({uuid: this.categoryUuid, ...this.allLists})
+
+            const {
+                uuid: categoryUuid,
+                ...allList
+            } = fetchedData
+
+            this.allLists = allList
+            this.categoryUuid = categoryUuid
         } catch (error) {
-          console.error('There was a problem with upsertCategory:', error)
+            console.error('There was a problem with upsertCategory:', error)
         } finally {
-          this.workingTasks--
+            this.workingTasks--
         }
       })
     },
@@ -184,11 +189,10 @@ export const useTasksStore = defineStore({
     // edit dialog action
     openEditDialog(item) {
       console.log('item:', item)
-      if (!item.uuid) {
-        this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
-      } else {
-        this.editedItem = item
-      }
+        if (!item.uuid)
+            this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
+        else
+            this.editedItem = item
 
       this.editDialog = true
     },
@@ -218,8 +222,8 @@ export const useTasksStore = defineStore({
     async saveEditedItem() {
       this.editDialog = false
       if (this.editedItem.uuid === '') {
-        this.editedItem.uuid = uuidv4()
-        this.tableItems.push(this.editedItem)
+          this.editedItem.uuid = uuidv4()
+          this.tableItems.unshift(this.editedItem) // 插入头部
       }
       this.saveEdit = !this.saveEdit
     },
@@ -234,14 +238,15 @@ export const useTasksStore = defineStore({
       this.editedItem.detail = ''
       this.editedItem.uuid = ''
     },
-    // category action
+
+      // category action
     updateCategory(index, listname) {
-      if (index === -1) {
-        this.allLists[listname].push(this.newItemCategories[listname])
-        this.newItemCategories[listname] = ''
-      } else {
-        this.allLists[listname].splice(index, 1)
-      }
+        if (index === -1) {
+            this.allLists[listname].push(this.newItemCategories[listname])
+            this.newItemCategories[listname] = ''
+        } else {
+            this.allLists[listname].splice(index, 1)
+        }
       this.saveCategory = !this.saveCategory
     },
   },
