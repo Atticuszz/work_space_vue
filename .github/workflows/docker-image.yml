@@ -1,4 +1,4 @@
-name: Build and Push FastAPI Docker Image
+name: Build and Push VUE Docker Image
 
 on:
   push:
