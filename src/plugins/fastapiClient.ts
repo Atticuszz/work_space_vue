@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const baseURL = import.meta.env.VITE_FASTAPI_DOMAIN
-// console.log('Base URL:', baseURL);
+console.log('Base URL:', baseURL);
 const fastapiClient = axios.create({
   baseURL: baseURL,
   headers: {
