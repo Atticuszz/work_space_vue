@@ -155,7 +155,7 @@ export default {
     hideDetails: 'auto',
   },
   VTextarea: {
-    variant: 'outlined',
+    variant: 'solo-filled',
     density: 'compact',
     color: 'primary',
     hideDetails: 'auto',
@@ -169,7 +169,6 @@ export default {
   VTimeline: {
     lineThickness: 1,
   },
-
   VDataTable: {
     VDataTableFooter: {
       VBtn: {

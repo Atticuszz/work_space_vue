@@ -1,13 +1,14 @@
 import axios from 'axios'
 
+const baseURL = 'https://oyster-app-i5v56.ondigitalocean.app'
+
 const fastapiClient = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 10000,
-})
-
+});
 //
 // // ℹ️ Add request interceptor to send the authorization header on each subsequent request after login
 // axiosIns.interceptors.request.use(config => {

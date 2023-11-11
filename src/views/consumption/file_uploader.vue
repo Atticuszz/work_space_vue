@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import axios from '@axios'
+import axios from 'axios'
 
 const file = ref(null) // 注意这里初始化为 null
 const loading = ref(false)

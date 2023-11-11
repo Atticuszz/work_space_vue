@@ -1,8 +1,8 @@
-import type { VuetifyOptions } from 'vuetify'
-import { resolveVuetifyTheme } from '@core/utils/vuetify'
-import { themeConfig } from '@themeConfig'
+import type {VuetifyOptions} from 'vuetify'
+import {resolveVuetifyTheme} from '@core/utils/vuetify'
+import {themeConfig} from '@themeConfig'
 
-export const staticPrimaryColor = '#7367F0'
+export const staticPrimaryColor = '#67f07e'
 
 const theme: VuetifyOptions['theme'] = {
   defaultTheme: resolveVuetifyTheme(),
@@ -97,7 +97,7 @@ const theme: VuetifyOptions['theme'] = {
         'skin-bordered-surface': '#2f3349',
       },
       variables: {
-        'code-color': '#d400ff',
+        'code-color': '#4cff00',
         'overlay-scrim-background': '#101121',
         'tooltip-background': '#5E6692',
         'overlay-scrim-opacity': 0.6,

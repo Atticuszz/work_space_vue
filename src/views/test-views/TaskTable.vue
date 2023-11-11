@@ -1,8 +1,8 @@
 <script setup>
-import { useTasksStore } from '@/store/tasks'
-import { onMounted } from 'vue'
+import {useTasksStore} from '@/store/tasks'
+import {onMounted} from 'vue'
 
-import { VDataTable } from 'vuetify/labs/VDataTable'
+import {VDataTable} from 'vuetify/labs/VDataTable'
 
 const tasksStore = useTasksStore()
 
