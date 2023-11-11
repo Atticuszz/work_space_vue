@@ -6,7 +6,7 @@ WORKDIR /app
 ARG API_DOMAIN
 
 # 将参数值设置为环境变量，这样应用构建时可以使用它
-ENV VITE_FASTAPI_DOMAIN=${API_DOMAIN}
+ENV VITE_FASTAPI_DOMAIN="https://plankton-app-hfdpj.ondigitalocean.app/"
 
 COPY package.json yarn.lock ./
 COPY . .
