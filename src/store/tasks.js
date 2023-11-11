@@ -190,7 +190,8 @@ export const useTasksStore = defineStore({
     openEditDialog(item) {
       console.log('item:', item)
         if (!item.uuid)
-            this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
+            // this.editedItem.date = new Date().toLocaleDateString().replace(/\//g, '-')
+            this.editedItem.date = new Date().toISOString().split('T')[0]
         else
             this.editedItem = item
 
