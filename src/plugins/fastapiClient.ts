@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-const baseURL = 'https://oyster-app-i5v56.ondigitalocean.app'
-
+const baseURL = import.meta.env.VITE_FASTAPI_DOMAIN
+// console.log('Base URL:', baseURL);
 const fastapiClient = axios.create({
   baseURL: baseURL,
   headers: {

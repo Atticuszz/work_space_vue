@@ -1,6 +1,13 @@
 # 构建阶段
 FROM node:lts-alpine AS build-stage
 WORKDIR /app
+
+# 定义一个参数，用于设置环境变量
+ARG API_DOMAIN
+
+# 将参数值设置为环境变量，这样应用构建时可以使用它
+ENV VITE_FASTAPI_DOMAIN=${API_DOMAIN}
+
 COPY package.json yarn.lock ./
 COPY . .
 RUN yarn install
