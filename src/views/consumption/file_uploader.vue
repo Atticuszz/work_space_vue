@@ -1,12 +1,10 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
-import axios from 'axios'
+import { ref } from 'vue'
+import { upload_bill } from "@/store/api"
 
 const file = ref(null) // 注意这里初始化为 null
 const loading = ref(false)
 const password = ref('')
-// TODO: 请求统一到api端管理
-// TODO: 添加支付宝的跳转链接
 const uploadFile = async () => {
   loading.value = true // 开始上传，设置loading为true
 
@@ -16,23 +14,13 @@ const uploadFile = async () => {
     formData.append('file', file.value[0]) // 注意这里是 file.value[0]
     formData.append('password', password.value)
 
-    try {
-      await axios.post('http://localhost:5000/consumption/update_consumption', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-      alert('文件成功上传并处理。')
-    } catch (error) {
-      alert('文件上传失败。')
-    }
+    await upload_bill(formData)
   } else {
-    alert('请选择一个文件。')
+    alert('请选择文件')
   }
-
   loading.value = false // 上传完成，设置loading为false
-}
 
+}
 const externalLink = ref({
   url: 'https://consumeprod.alipay.com/record/standard.htm',
   label: '支付宝消费记录',

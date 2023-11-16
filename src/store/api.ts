@@ -1,4 +1,5 @@
 import fastapiClient from '@/plugins/fastapiClient'
+import axios from "axios/index"
 
 export const fetchAllTasks = async () => {
   try {
@@ -57,3 +58,16 @@ export const upsertCategory = async allList => {
     console.error('There was a problem updating category:', error)
   }
 }
+export const upload_bill = async formData => {
+  try {
+    await fastapiClient.post('consumption/update_consumption', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    alert('文件成功上传并处理。')
+  } catch (error) {
+    alert('文件上传失败。')
+  }
+}
+
